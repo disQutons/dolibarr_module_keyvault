@@ -1,0 +1,65 @@
+#
+# key_card.php
+#
+DeleteKey=Delete Key
+AuthorizedGroups=Authorized Groups
+UnauthorizedAccess=Unauthorized Access
+
+#
+# key_document.php
+#
+bytes=
+
+#
+# key_list.php
+#
+Keys=Keys
+
+#
+# admin\key_extrafields.php
+#
+KeyVaultSetup=Paramétrage du coffre-fort de clés
+
+#
+# admin\setup.php
+#
+KeyVaultSetupPage=Paramétrage du coffre-fort de clés
+EncryptAllKeys=Chiffrer toutes les clés existantes
+EncryptionComplete=Chiffrement terminé
+EncryptionError=Erreur lors du chiffrement
+NoKeysToEncrypt=Aucune clé à chiffrer
+EncryptionHelp=Utile en cas d'import par exemple.
+
+#
+# class\key.class.php
+#
+ClassNotFound=Classe non trouvée
+EmptyFieldNovisibility=Si le champs est vide, alors ce mot de passe ne sera visible par personne
+CategoryDict=Les catégories peuvent être modifiée dans les dictionnaires
+
+
+#
+# key_inpection.php
+#
+KeyVaultInspection=Coffre fort : Vérification des accès
+SelectUser=Sélectionner un utilisateur
+Inspect=Vérifier
+NoKeyUserRight=Pas d'accès par l'utilisateur
+NoKeyGroupRight=Pas d'accès par les groupes
+idkey=ID
+keyname=Nom de la clé
+
+#
+# core\modules\modKeyVault.class.php
+#
+CodeTooltipHelp=
+keyinspection=Vérification accès
+
+#
+# Common Translations
+#
+None=Aucun
+Key=Clé
+KeyVault=Coffre-fort
+ShowKey=Afficher la clé
+AuthorizedUsers=Utilisateurs autorisés
