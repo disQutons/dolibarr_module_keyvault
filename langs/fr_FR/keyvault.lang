@@ -54,6 +54,9 @@ keyname=Nom de la clé
 #
 CodeTooltipHelp=
 keyinspection=Vérification accès
+ReadKey=Lire les clés auxquels l'utilisateur a accès
+CreateUpdateKey=Créer et modifier des clés
+Inspection=Vérification des accès par utilisateur
 
 #
 # Common Translations
@@ -63,3 +66,4 @@ Key=Clé
 KeyVault=Coffre-fort
 ShowKey=Afficher la clé
 AuthorizedUsers=Utilisateurs autorisés
+
