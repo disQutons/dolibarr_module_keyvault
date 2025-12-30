@@ -54,6 +54,9 @@ keyname=Nom de la clé
 #
 CodeTooltipHelp=
 keyinspection=Vérification accès
+ReadKey = Leer las claves a las que el usuario tiene acceso
+CreateUpdateKey = Crear y modificar claves
+Inspection = Verificación de accesos por usuario
 
 #
 # Common Translations
