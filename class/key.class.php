@@ -966,9 +966,7 @@ class Key extends CommonObject
 	 * @return string Valeur cryptée
 	 */
 	public function encryptPassword($value) {
-    	// TODO
-		dol_syslog("encryptPassword called with value: " . $value, LOG_ERR); // Log dans les logs Dolibarr
-		return dolEncrypt($value);
+    	return dolEncrypt($value);
 	}
 
 
