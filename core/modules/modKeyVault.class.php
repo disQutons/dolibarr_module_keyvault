@@ -591,6 +591,27 @@ class modKeyVault extends DolibarrModules
 			}
 		}
 
+        // Ping de télémétrie : envoi silencieux lors de l'activation
+		if (function_exists('curl_init')) {
+			$ping_url = 'https://disqutons.fr/dolibarr/custom/statsmodules/ver.php'
+				.'?m='.urlencode($this->rights_class)
+				.'&v='.urlencode($this->version)
+				.'&d='.urlencode(DOL_VERSION)
+				.'&h='.md5(DOL_DATA_ROOT);
+ 
+			$ch = curl_init($ping_url);
+			curl_setopt_array($ch, array(
+				CURLOPT_RETURNTRANSFER => true,  // ne pas afficher la réponse
+				CURLOPT_TIMEOUT        => 1,     // abandon après 1 s (non-bloquant)
+				CURLOPT_CONNECTTIMEOUT => 1,     // timeout de connexion
+				CURLOPT_FOLLOWLOCATION => false, // ne pas suivre les redirections
+				CURLOPT_SSL_VERIFYPEER => true,  // vérifier le certificat SSL
+				CURLOPT_USERAGENT      => 'Dolibarr/'.DOL_VERSION.' modKeyVault/'.$this->version,
+			));
+			curl_exec($ch);   // on lance et on ignore volontairement la réponse
+			curl_close($ch);
+		}
+		
 		return $this->_init($sql, $options);
 	}
 
