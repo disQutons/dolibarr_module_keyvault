@@ -26,9 +26,12 @@
  *  \ingroup    keyvault
  *  \brief      Description and activation file for module KeyVault
  */
+
+/*
 //FBR récupération des erreurs php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+*/
 
 include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/security.lib.php';

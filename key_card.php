@@ -23,10 +23,11 @@
  *    \brief      Page to create/edit/view key
  */
 
-
+/*
 //FBR récupération des erreurs php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+*/
 
 // General defined Options
 //if (! defined('CSRFCHECK_WITH_TOKEN'))     define('CSRFCHECK_WITH_TOKEN', '1');					// Force use of CSRF protection with tokens even for GET
