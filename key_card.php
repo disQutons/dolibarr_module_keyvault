@@ -186,6 +186,16 @@ if ($id > 0) {
 
     $accessAllowed = false;
 	
+	// Si ni utilisateurs ni groupes autorisés ne sont définis, la clé n'est pas restrictive.
+	if (empty($object->rights_user) && empty($object->rights_group)) {
+		$accessAllowed = true;
+	}
+	
+	// Le créateur de la clé garde toujours accès, même s'il n'est pas (ou plus) dans les utilisateurs/groupes
+	// autorisés (voir issue #4 : perte d'accès du créateur après ajout à un groupe non autorisé).
+	if (!$accessAllowed && !empty($object->fk_user_creat) && (int) $object->fk_user_creat === (int) $user->id) {
+		$accessAllowed = true;
+	}
 
     // Vérification des utilisateurs autorisés
     if (!empty($object->rights_user)) {
