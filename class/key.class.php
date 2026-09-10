@@ -33,7 +33,7 @@ ini_set('display_errors', 1);
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/security.lib.php';
 
-//require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+dol_include_once('/keyvault/lib/keyvault_key.lib.php');
 
 /**
  * Class for Key
@@ -963,12 +963,15 @@ class Key extends CommonObject
 	}
 
 	/**
-	 * Fonction pour crypter une valeur
+	 * Fonction pour crypter une valeur.
+	 * Utilise le wrapper keyvaultEncrypt() (seed personnalisé + clé dérivée par PBKDF2, voir
+	 * lib/keyvault_key.lib.php) plutôt qu'un appel direct à dolEncrypt(), afin de ne jamais renvoyer
+	 * une valeur en clair si le chiffrement ne peut pas être appliqué (ex: extension openssl absente).
 	 * @param string $value Valeur à crypter
-	 * @return string Valeur cryptée
+	 * @return string|false Valeur cryptée, ou false si le chiffrement n'a pas pu être appliqué
 	 */
 	public function encryptPassword($value) {
-    	return dolEncrypt($value);
+		return keyvaultEncrypt($value);
 	}
 
 	/**

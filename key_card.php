@@ -294,8 +294,14 @@ if (empty($reshook)) {
 		// Récupérer la valeur brute envoyée (utilise $_POST directement pour ne pas altérer les caractères)
 		$plainPass = isset($_POST['pass']) ? $_POST['pass'] : GETPOST('pass', 'alpha');
 		if ($plainPass !== null && $plainPass !== '') {
-			$enc = dolEncrypt($plainPass);
-			if (!empty($enc)) {
+			// keyvaultEncrypt() renvoie false si le chiffrement n'a pas pu être appliqué
+			// On bloque l'enregistrement du mot de passe plutôt que de le stocker en clair silencieusement.
+			$enc = keyvaultEncrypt($plainPass);
+			if ($enc === false) {
+				setEventMessages($langs->trans('KeyVaultEncryptionUnavailable'), null, 'errors');
+				$_POST['pass'] = '';
+				$object->pass = '';
+			} else {
 				// Remplacer $_POST afin que la logique d'enregistrement utilise la valeur chiffrée
 				$_POST['pass'] = $enc;
 				// Mettre aussi à jour l'objet si le code utilise $object->pass

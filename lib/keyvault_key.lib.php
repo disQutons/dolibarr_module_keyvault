@@ -21,6 +21,8 @@
  * \brief   Library files with common functions for Key
  */
 
+require_once DOL_DOCUMENT_ROOT.'/core/lib/security.lib.php';
+
 /**
  * Prepare array of tabs for Key
  *
@@ -180,6 +182,58 @@ function keyvaultReencryptAllKeys($oldSeed, $newSeed)
 }
 
 /**
+ * Dérive une clé de chiffrement (PBKDF2-SHA256, 100000 itérations) à partir du seed KeyVault, au lieu
+ * d'utiliser directement ce seed comme clé AES. Cela limite le risque lié à une faible entropie du seed
+ *
+ * @return string Clé dérivée, encodée en hexadécimal, à transmettre à dolEncrypt()/dolDecrypt()
+ */
+function keyvaultGetEncryptionKey()
+{
+	$seed = keyvaultGetEncryptionSeed();
+	if ($seed === '') {
+		return '';
+	}
+
+	return bin2hex(hash_pbkdf2('sha256', $seed, 'keyvault_salt', 100000, 32, true));
+}
+
+/**
+ * Chiffre une valeur sensible de KeyVault.
+ *
+ * @param string $value Valeur en clair
+ * @return string|false Valeur chiffrée, ou false si le chiffrement n'a pas pu être appliqué
+ */
+function keyvaultEncrypt($value)
+{
+	if ($value === '' || $value === null) {
+		return '';
+	}
+
+	$encrypted = dolEncrypt($value, keyvaultGetEncryptionKey());
+
+	if (strpos($encrypted, 'dolcrypt:') !== 0) {
+		return false;
+	}
+
+	return $encrypted;
+}
+
+/**
+ * Déchiffre une valeur sensible de KeyVault, en utilisant le même seed que keyvaultEncrypt().
+ *
+ * @param string $value Valeur chiffrée
+ * @return string Valeur en clair
+ */
+function keyvaultDecrypt($value)
+{
+	if (empty($value)) {
+		return $value;
+	}
+
+	return dolDecrypt($value, keyvaultGetEncryptionKey());
+}
+
+/**
  * Crypte tous les champs sensibles non cryptés dans la table des clés
  *
  * @return int Nombre de champs cryptés, ou -1 en cas d'erreur
@@ -202,7 +256,15 @@ function encryptAllKeys()
 
             // Cryptage du mot de passe
             if (!empty($obj->pass) && !isFieldEncrypted($obj->pass)) {
-                $fieldsToUpdate['pass'] = dolEncrypt($obj->pass);
+                // keyvaultEncrypt() renvoie false si le chiffrement n'a pas pu être appliqué.
+                // On refuse alors l'opération plutôt que de laisser le mot de passe en clair.
+                $encryptedPass = keyvaultEncrypt($obj->pass);
+                if ($encryptedPass === false) {
+                    dol_syslog("Erreur lors du chiffrement de la clé ID ".$rowid.": extension openssl indisponible", LOG_ERR);
+                    $db->rollback();
+                    return -1;
+                }
+                $fieldsToUpdate['pass'] = $encryptedPass;
                 $encryptedCount++;
             }
 
