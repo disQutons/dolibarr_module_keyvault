@@ -32,6 +32,7 @@ EncryptionHelp=Utile en cas d'import par exemple.
 KeyVaultEncryptSeedHelp=Seed personnalisé utilisé pour chiffrer/déchiffrer les mots de passe. Si vous le modifiez, toutes les clés déjà enregistrées seront automatiquement rechiffrées avec le nouveau seed. Laissez vide pour utiliser le comportement par défaut de Dolibarr.
 KeyVaultReencryptDone=%s clé(s) rechiffrée(s) avec le nouveau seed
 KeyVaultReencryptError=Erreur lors du rechiffrement des clés avec le nouveau seed
+KEYVAULT_ENCRYPT_SEED=Seed personnalisée pour le cryptage
 
 #
 # class\key.class.php

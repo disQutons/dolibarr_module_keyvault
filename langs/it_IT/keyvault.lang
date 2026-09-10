@@ -27,6 +27,7 @@ KeyVaultSetupPage=Paramétrage du coffre-fort de clés
 EncryptAllKeys=Chiffrer toutes les clés existantes
 EncryptionComplete=Chiffrement terminé
 EncryptionError=Erreur lors du chiffrement
+KEYVAULT_ENCRYPT_SEED=Seed personalizzato per la crittografia
 NoKeysToEncrypt=Aucune clé à chiffrer
 EncryptionHelp=Utile en cas d'import par exemple.
 KeyVaultEncryptSeedHelp=Seed personnalisé utilisé pour chiffrer/déchiffrer les mots de passe. Si vous le modifiez, toutes les clés déjà enregistrées seront automatiquement rechiffrées avec le nouveau seed. Laissez vide pour utiliser le comportement par défaut de Dolibarr.
