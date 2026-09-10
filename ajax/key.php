@@ -56,6 +56,7 @@ if (!$res) {
 	die("Include of main fails");
 }
 dol_include_once('/keyvault/class/key.class.php');
+dol_include_once('/keyvault/lib/keyvault_key.lib.php');
 
 /**
  * @var Conf $conf
@@ -86,10 +87,61 @@ dol_syslog("Call ajax keyvault/ajax/key.php");
 
 top_httphead();
 
+// FIX $field n'était soumis à aucune liste blanche : un POST avec field=pass permettait d'écraser le mot
+//   de passe en clair, en contournant totalement keyvaultEncrypt (voir lib/keyvault_key.lib.php). On
+//   n'autorise donc désormais que les champs listés ci-dessous, tous non sensibles. pass, rights_user
+//   et rights_group sont explicitement exclus.
+// 
+// FIX Seul le droit global keyvault>key>write était vérifié, sans tenir compte des utilisateurs/groupes
+//   autorisés propres à la clé (rights_user/rights_group), contrairement à key_card.php. On applique donc
+//   ici la même logique d'accès que key_card.php avant toute modification.
+
+$allowedFields = array('label', 'login', 'url', 'note_public', 'note_private', 'fk_soc', 'fk_categ');
+
 // Update the object field with the new value
 if ($objectId && $field && isset($value)) {
 	$object->fetch($objectId);
+
 	if ($object->id > 0) {
+		$accessAllowed = false;
+
+		if (empty($object->rights_user) && empty($object->rights_group)) {
+			$accessAllowed = true;
+		}
+		if (!$accessAllowed && !empty($object->fk_user_creat) && (int) $object->fk_user_creat === (int) $user->id) {
+			$accessAllowed = true;
+		}
+		if (!$accessAllowed && !empty($object->rights_user)) {
+			$userIds = explode(',', $object->rights_user);
+			if (in_array((string) $user->id, $userIds)) {
+				$accessAllowed = true;
+			}
+		}
+		if (!$accessAllowed && !empty($object->rights_group)) {
+			$userGroup = new UserGroup($db);
+			$userGroups = $userGroup->listGroupsForUser($user->id);
+			if (is_array($userGroups)) {
+				foreach (explode(',', $object->rights_group) as $groupId) {
+					if (array_key_exists($groupId, $userGroups)) {
+						$accessAllowed = true;
+						break;
+					}
+				}
+			}
+		}
+
+		if (!$accessAllowed) {
+			print json_encode(['status' => 'error', 'message' => 'Unauthorized access to this key']);
+			$db->close();
+			exit;
+		}
+
+		if (!in_array($field, $allowedFields, true)) {
+			print json_encode(['status' => 'error', 'message' => 'Field '.$field.' is not allowed to be edited here']);
+			$db->close();
+			exit;
+		}
+
 		$object->$field = $value;
 	}
 	$result = $object->update($user);
