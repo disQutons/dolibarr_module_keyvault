@@ -971,6 +971,27 @@ class Key extends CommonObject
     	return dolEncrypt($value);
 	}
 
+	/**
+	 * @param	array<int,array{type:int,val:string}>	$arrayrecord	Enregistrement en cours d'import (par référence)
+	 * @param	array<string,int>						$arrayfield		Correspondance champ => index de colonne
+	 * @param	int										$key			Index de la colonne 's.pass' dans $arrayrecord
+	 * @return	string													Valeur chiffrée à utiliser pour l'insertion
+	 */
+	public function computeEncryptPassword(&$arrayrecord, $arrayfield, $key)
+	{
+		$value = isset($arrayrecord[$key]['val']) ? $arrayrecord[$key]['val'] : '';
+		if ($value === '') {
+			return '';
+		}
+
+		$encrypted = $this->encryptPassword($value);
+		if ($encrypted === false) {
+			$this->error = 'ErrorKeyVaultEncryptionUnavailable';
+			return '';
+		}
+
+		return $encrypted;
+	}
 
 	/**
 	 *	Return a thumb for kanban views

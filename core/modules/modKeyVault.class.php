@@ -522,7 +522,7 @@ class modKeyVault extends DolibarrModules
 				'pathobject'=>'/keyvault/class/key.class.php',
 			),
 			's.fk_soc' => array('rule' => 'fetchidfromref', 'file' => '/societe/class/societe.class.php', 'class' => 'Societe', 'method' => 'fetch', 'element' => 'ThirdParty'),
-			's.pass' => array('rule' => 'encryptPassword', 'file' => '/custom/keyvault/class/key.class.php', 'class' => 'Key', 'method' => 'encryptPassword'),
+			's.pass' => array('rule' => 'compute', 'file' => '/custom/keyvault/class/key.class.php', 'class' => 'Key', 'method' => 'computeEncryptPassword'),
 		);	
 		$this->import_run_sql_after_array[$r] = array();
 		$r++; 
