@@ -23,10 +23,11 @@
  *    \brief      Page to create/edit/view key
  */
 
-
+/*
 //FBR récupération des erreurs php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+*/
 
 // General defined Options
 //if (! defined('CSRFCHECK_WITH_TOKEN'))     define('CSRFCHECK_WITH_TOKEN', '1');					// Force use of CSRF protection with tokens even for GET
@@ -185,6 +186,16 @@ if ($id > 0) {
 
     $accessAllowed = false;
 	
+	// Si ni utilisateurs ni groupes autorisés ne sont définis, la clé n'est pas restrictive.
+	if (empty($object->rights_user) && empty($object->rights_group)) {
+		$accessAllowed = true;
+	}
+	
+	// Le créateur de la clé garde toujours accès, même s'il n'est pas (ou plus) dans les utilisateurs/groupes
+	// autorisés (voir issue #4 : perte d'accès du créateur après ajout à un groupe non autorisé).
+	if (!$accessAllowed && !empty($object->fk_user_creat) && (int) $object->fk_user_creat === (int) $user->id) {
+		$accessAllowed = true;
+	}
 
     // Vérification des utilisateurs autorisés
     if (!empty($object->rights_user)) {
@@ -283,8 +294,14 @@ if (empty($reshook)) {
 		// Récupérer la valeur brute envoyée (utilise $_POST directement pour ne pas altérer les caractères)
 		$plainPass = isset($_POST['pass']) ? $_POST['pass'] : GETPOST('pass', 'alpha');
 		if ($plainPass !== null && $plainPass !== '') {
-			$enc = dolEncrypt($plainPass);
-			if (!empty($enc)) {
+			// keyvaultEncrypt() renvoie false si le chiffrement n'a pas pu être appliqué
+			// On bloque l'enregistrement du mot de passe plutôt que de le stocker en clair silencieusement.
+			$enc = keyvaultEncrypt($plainPass);
+			if ($enc === false) {
+				setEventMessages($langs->trans('KeyVaultEncryptionUnavailable'), null, 'errors');
+				$_POST['pass'] = '';
+				$object->pass = '';
+			} else {
 				// Remplacer $_POST afin que la logique d'enregistrement utilise la valeur chiffrée
 				$_POST['pass'] = $enc;
 				// Mettre aussi à jour l'objet si le code utilise $object->pass
@@ -456,8 +473,9 @@ if (($id || $ref) && $action == 'edit') {
 	print '<table class="border centpercent tableforfieldedit">'."\n";
 
 	// Décrypter le mot de passe pour affichage et copy-to-clipboard si nécessaire
+	// keyvaultDecrypt() applique le seed personnalisé défini dans le setup du module
 	if (!empty($object->pass)) {
-		$object->pass = dolDecrypt($object->pass);
+		$object->pass = keyvaultDecrypt($object->pass);
 	}
 
 	unset($object->fields['rights_group']);
@@ -498,8 +516,9 @@ if (($id || $ref) && $action == 'edit') {
 // Part to show record
 if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
 	// Décrypter le mot de passe pour affichage et copy-to-clipboard si nécessaire
+	// keyvaultDecrypt() applique le seed personnalisé défini dans le setup du module
 	if (!empty($object->pass)) {
-		$object->pass = dolDecrypt($object->pass);
+		$object->pass = keyvaultDecrypt($object->pass);
 	}
 
 	$head = keyPrepareHead($object);
@@ -663,21 +682,14 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				print dolGetButtonAction('', $langs->trans('ToClone'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.(!empty($object->socid) ? '&socid='.$object->socid : '').'&action=clone&token='.newToken(), '', $permissiontoadd);
 			}
 			
-			// TODO Disable / Enable
-			/*if ($permissiontoadd) {
-				if ($object->status == $object::STATUS_ENABLED) {
-					print dolGetButtonAction('', $langs->trans('Disable'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=disable&token='.newToken(), '', $permissiontoadd);
-				} else {
-					print dolGetButtonAction('', $langs->trans('Enable'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=enable&token='.newToken(), '', $permissiontoadd);
-				}
-			}
+			// Disable / Enable
 			if ($permissiontoadd) {
 				if ($object->status == $object::STATUS_VALIDATED) {
-					print dolGetButtonAction('', $langs->trans('Cancel'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=close&token='.newToken(), '', $permissiontoadd);
-				} else {
-					print dolGetButtonAction('', $langs->trans('Re-Open'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=reopen&token='.newToken(), '', $permissiontoadd);
+					print dolGetButtonAction('', $langs->trans('Disable'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_close&confirm=yes&token='.newToken(), '', $permissiontoadd);
+				} elseif ($object->status == $object::STATUS_CANCELED) {
+					print dolGetButtonAction('', $langs->trans('Enable'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_reopen&confirm=yes&token='.newToken(), '', $permissiontoadd);
 				}
-			}*/
+			}
 			
 
 			// Delete (with preloaded confirm popup)

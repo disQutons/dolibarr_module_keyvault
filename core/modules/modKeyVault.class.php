@@ -26,9 +26,12 @@
  *  \ingroup    keyvault
  *  \brief      Description and activation file for module KeyVault
  */
+
+/*
 //FBR récupération des erreurs php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+*/
 
 include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/security.lib.php';
@@ -81,7 +84,7 @@ class modKeyVault extends DolibarrModules
 		$this->editor_squarred_logo = 'logo_disQutons.png@subventions';					// Must be image filename into the module/img directory followed with @modulename. Example: 'myimage.png@keyvault'
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated', 'experimental_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.0';
+		$this->version = '1.2';
 		// Url to the file with your last numberversion of this module
 		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
 
@@ -97,7 +100,7 @@ class modKeyVault extends DolibarrModules
 		// Define some features supported by module (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array(
 			// Set this to 1 if module has its own trigger directory (core/triggers)
-			'triggers' => 0,
+			'triggers' => 1,
 			// Set this to 1 if module has its own login method file (core/login)
 			'login' => 0,
 			// Set this to 1 if module has its own substitution function file (core/substitutions)
@@ -519,7 +522,7 @@ class modKeyVault extends DolibarrModules
 				'pathobject'=>'/keyvault/class/key.class.php',
 			),
 			's.fk_soc' => array('rule' => 'fetchidfromref', 'file' => '/societe/class/societe.class.php', 'class' => 'Societe', 'method' => 'fetch', 'element' => 'ThirdParty'),
-			's.pass' => array('rule' => 'encryptPassword', 'file' => '/custom/keyvault/class/key.class.php', 'class' => 'Key', 'method' => 'encryptPassword'),
+			's.pass' => array('rule' => 'compute', 'file' => '/custom/keyvault/class/key.class.php', 'class' => 'Key', 'method' => 'computeEncryptPassword'),
 		);	
 		$this->import_run_sql_after_array[$r] = array();
 		$r++; 

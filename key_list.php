@@ -334,6 +334,8 @@ if ($object->ismultientitymanaged == 1) {
 // Restrict list to keys accessible by current user (apply to all users including admin)
 $sql .= " AND (FIND_IN_SET(".((int) $user->id).", t.rights_user) ";
 $sql .= " OR EXISTS (SELECT 1 FROM ".$db->prefix()."usergroup_user ug WHERE ug.fk_user = ".((int) $user->id)." AND FIND_IN_SET(ug.fk_usergroup, t.rights_group))";
+$sql .= " OR (COALESCE(t.rights_user, '') = '' AND COALESCE(t.rights_group, '') = '')";
+$sql .= " OR t.fk_user_creat = ".((int) $user->id);
 $sql .= ")";
 foreach ($search as $key => $val) {
 	// Special handling: allow searching rights_group by group name and rights_user by user name or id

@@ -74,31 +74,6 @@ class ActionsKeyVault extends CommonHookActions
 		$this->db = $db;
 	}
 	
-	/**
-	 * Hook pour afficher des informations dans l'onglet vue d'ensemble d'un projet
-	 */
-	/*public function ImportInsert($parameters) {
-        $arrayrecord = &$parameters['arrayrecord'];
-        $array_match_file_to_database = $parameters['array_match_file_to_database'];
-
-        // Trouver l'index de la colonne 's.pass'
-        $passIndex = null;
-        foreach ($array_match_file_to_database as $index => $field) {
-            if ($field === 's.pass') {
-                $passIndex = $index;
-                break;
-            }
-        }
-
-        if ($passIndex !== null && !empty($arrayrecord[$passIndex]['val'])) {
-            require_once DOL_DOCUMENT_ROOT.'/core/lib/security.lib.php';
-
-            $originalPassword = $arrayrecord[$passIndex]['val'];
-            $encryptedPassword = dolEncrypt($originalPassword);
-            $arrayrecord[$passIndex]['val'] = $encryptedPassword;
-        }
-        return 0;
-    }*/
     public function ImportInsert($parameters)
     {
         $arrayrecord = &$parameters['arrayrecord'];
