@@ -188,6 +188,12 @@ $item->cssClass = 'minwidth500';
 //$item = $formSetup->newItem('KEYVAULT_MYPARAM13')->setAsDate();	// Not yet implemented
 */
 
+// Seed personnalisé pour le chiffrement/déchiffrement des clés.
+// Si laissé vide, KeyVault utilise le comportement par défaut de Dolibarr (identifiant unique de l'instance).
+$item = $formSetup->newItem('KEYVAULT_ENCRYPT_SEED');
+$item->setAsSecureKey();
+$item->helpText = $langs->trans('KeyVaultEncryptSeedHelp');
+
 // End of definition of parameters
 
 
@@ -227,7 +233,23 @@ if (versioncompare(explode('.', DOL_VERSION), array(15)) < 0 && $action == 'upda
 	$formSetup->saveConfFromPost();
 }
 
+// On stocke l'ancien seed pour rechiffrer les clés existantes si on change KEYVAULT_ENCRYPT_SEED
+$oldEncryptSeed = getDolGlobalString('KEYVAULT_ENCRYPT_SEED');
+
 include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
+
+// Décrypte et encrypte les clés
+if ($action == 'update' && !empty($user->admin) && GETPOSTISSET('KEYVAULT_ENCRYPT_SEED')) {
+	$newEncryptSeed = GETPOST('KEYVAULT_ENCRYPT_SEED', 'alpha');
+	if ($newEncryptSeed !== $oldEncryptSeed) {
+		$resultReencrypt = keyvaultReencryptAllKeys($oldEncryptSeed, $newEncryptSeed);
+		if ($resultReencrypt > 0) {
+			setEventMessages($langs->trans('KeyVaultReencryptDone', $resultReencrypt), null, 'mesgs');
+		} elseif ($resultReencrypt < 0) {
+			setEventMessages($langs->trans('KeyVaultReencryptError'), null, 'errors');
+		}
+	}
+}
 
 if ($action == 'updateMask') {
 	$maskconst = GETPOST('maskconst', 'aZ09');

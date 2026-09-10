@@ -110,6 +110,76 @@ function keyPrepareHead($object)
 }
 
 /**
+ * Retourne le seed utilisé pour chiffrer/déchiffrer les données sensibles de KeyVault.
+ * Si un seed personnalisé est défini dans le setup du module (KEYVAULT_ENCRYPT_SEED), il est utilisé.
+ * Sinon, on retombe sur le comportement par défaut de Dolibarr (identifiant unique de l'instance).
+ *
+ * @return string Seed à utiliser
+ */
+function keyvaultGetEncryptionSeed()
+{
+	global $conf;
+
+	$seed = getDolGlobalString('KEYVAULT_ENCRYPT_SEED');
+	if (!empty($seed)) {
+		return $seed;
+	}
+
+	return !empty($conf->file->instance_unique_id) ? $conf->file->instance_unique_id : '';
+}
+
+/**
+ * Rechiffre toutes les clés existantes avec un nouveau seed. Appelée quand l'admin change
+ * KEYVAULT_ENCRYPT_SEED dans le setup du module, afin de ne pas perdre l'accès aux mots de passe
+ * déjà enregistrés avec l'ancien seed.
+ *
+ * @param string $oldSeed Ancien seed (chaîne vide = comportement par défaut de Dolibarr)
+ * @param string $newSeed Nouveau seed (chaîne vide = comportement par défaut de Dolibarr)
+ * @return int Nombre de clés rechiffrées, ou -1 en cas d'erreur
+ */
+function keyvaultReencryptAllKeys($oldSeed, $newSeed)
+{
+	global $db;
+
+	$oldKey = empty($oldSeed) ? '' : bin2hex(hash_pbkdf2('sha256', $oldSeed, 'keyvault_salt', 100000, 32, true));
+	$newKey = empty($newSeed) ? '' : bin2hex(hash_pbkdf2('sha256', $newSeed, 'keyvault_salt', 100000, 32, true));
+
+	$reencryptedCount = 0;
+	$db->begin();
+
+	$sql = "SELECT rowid, pass FROM ".MAIN_DB_PREFIX."keyvault_key WHERE pass IS NOT NULL AND pass != ''";
+	$result = $db->query($sql);
+
+	if (!$result) {
+		dol_syslog("Erreur lors de la sélection des clés pour rechiffrement", LOG_ERR);
+		$db->rollback();
+		return -1;
+	}
+
+	while ($obj = $db->fetch_object($result)) {
+		$plain = dolDecrypt($obj->pass, $oldKey);
+		$newEncrypted = dolEncrypt($plain, $newKey);
+
+		if (strpos($newEncrypted, 'dolcrypt:') !== 0) {
+			dol_syslog("Erreur lors du rechiffrement de la clé ID ".$obj->rowid.": extension openssl indisponible", LOG_ERR);
+			$db->rollback();
+			return -1;
+		}
+
+		$updateSql = "UPDATE ".MAIN_DB_PREFIX."keyvault_key SET pass = '".$db->escape($newEncrypted)."' WHERE rowid = ".((int) $obj->rowid);
+		if (!$db->query($updateSql)) {
+			dol_syslog("Erreur lors de la mise à jour de la clé ID ".$obj->rowid." pendant le rechiffrement", LOG_ERR);
+			$db->rollback();
+			return -1;
+		}
+		$reencryptedCount++;
+	}
+
+	$db->commit();
+	return $reencryptedCount;
+}
+
+/**
  * Crypte tous les champs sensibles non cryptés dans la table des clés
  *
  * @return int Nombre de champs cryptés, ou -1 en cas d'erreur

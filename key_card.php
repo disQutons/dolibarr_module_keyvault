@@ -457,8 +457,9 @@ if (($id || $ref) && $action == 'edit') {
 	print '<table class="border centpercent tableforfieldedit">'."\n";
 
 	// Décrypter le mot de passe pour affichage et copy-to-clipboard si nécessaire
+	// keyvaultDecrypt() applique le seed personnalisé défini dans le setup du module
 	if (!empty($object->pass)) {
-		$object->pass = dolDecrypt($object->pass);
+		$object->pass = keyvaultDecrypt($object->pass);
 	}
 
 	unset($object->fields['rights_group']);
@@ -499,8 +500,9 @@ if (($id || $ref) && $action == 'edit') {
 // Part to show record
 if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
 	// Décrypter le mot de passe pour affichage et copy-to-clipboard si nécessaire
+	// keyvaultDecrypt() applique le seed personnalisé défini dans le setup du module
 	if (!empty($object->pass)) {
-		$object->pass = dolDecrypt($object->pass);
+		$object->pass = keyvaultDecrypt($object->pass);
 	}
 
 	$head = keyPrepareHead($object);
