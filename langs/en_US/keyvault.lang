@@ -29,13 +29,18 @@ EncryptionComplete=Chiffrement terminé
 EncryptionError=Erreur lors du chiffrement
 NoKeysToEncrypt=Aucune clé à chiffrer
 EncryptionHelp=Utile en cas d'import par exemple.
+KeyVaultEncryptSeedHelp=Seed personnalisé utilisé pour chiffrer/déchiffrer les mots de passe. Si vous le modifiez, toutes les clés déjà enregistrées seront automatiquement rechiffrées avec le nouveau seed. Laissez vide pour utiliser le comportement par défaut de Dolibarr.
+KeyVaultReencryptDone=%s clé(s) rechiffrée(s) avec le nouveau seed
+KeyVaultReencryptError=Erreur lors du rechiffrement des clés avec le nouveau seed
 
 #
 # class\key.class.php
 #
 ClassNotFound=Classe non trouvée
-EmptyFieldNovisibility=Si le champs est vide, alors ce mot de passe ne sera visible par personne
+EmptyFieldNovisibility=Si le champ est vide, ce mot de passe ne sera restreint à personne (visible par tous les utilisateurs ayant accès au module)
 CategoryDict=Les catégories peuvent être modifiée dans les dictionnaires
+KeyVaultEncryptionUnavailable=Le chiffrement du mot de passe a échoué (extension openssl indisponible). Le mot de passe n'a pas été enregistré pour éviter de le stocker en clair.
+ErrorKeyVaultEncryptionUnavailable=Le chiffrement du mot de passe a échoué pendant l'import (extension openssl indisponible)
 
 
 #
@@ -57,6 +62,17 @@ keyinspection=Vérification accès
 ReadKey = Read keys the user has access to
 CreateUpdateKey = Create and update keys
 Inspection = Access verification by user
+
+#
+# core\triggers\interface_99_modKeyVault_KeyVaultTriggers.class.php
+#
+KeyVaultHistoCreated=Clé %s créée
+KeyVaultHistoModified=Clé %s modifiée
+KeyVaultHistoDeleted=Clé %s supprimée
+KeyVaultHistoValidated=Clé %s validée
+KeyVaultHistoSetDraft=Clé %s remise en brouillon
+KeyVaultHistoDisabled=Clé %s désactivée
+KeyVaultHistoEnabled=Clé %s réactivée
 
 #
 # Common Translations
