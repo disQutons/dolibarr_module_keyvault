@@ -162,7 +162,7 @@ function keyvaultReencryptAllKeys($oldSeed, $newSeed)
 		$plain = dolDecrypt($obj->pass, $oldKey);
 		$newEncrypted = dolEncrypt($plain, $newKey);
 
-		if (strpos($newEncrypted, 'dolcrypt:') !== 0) {
+		if ($newEncrypted === $plain || strpos($newEncrypted, 'dolcrypt:') !== 0) {
 			dol_syslog("Erreur lors du rechiffrement de la clé ID ".$obj->rowid.": extension openssl indisponible", LOG_ERR);
 			$db->rollback();
 			return -1;
@@ -211,7 +211,7 @@ function keyvaultEncrypt($value)
 
 	$encrypted = dolEncrypt($value, keyvaultGetEncryptionKey());
 
-	if (strpos($encrypted, 'dolcrypt:') !== 0) {
+	if ($encrypted === $value || strpos($encrypted, 'dolcrypt:') !== 0) {
 		return false;
 	}
 
@@ -303,6 +303,6 @@ function encryptAllKeys()
  */
 function isFieldEncrypted($value)
 {
-    return (base64_encode(base64_decode($value, true)) === $value && !ctype_digit($value));
+    return strpos((string) $value, 'dolcrypt:') === 0;
 }
 
