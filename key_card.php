@@ -634,9 +634,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	print '<tr><td>'.$langs->trans("Utilisateurs autorisés").'</td>';
 	print '<td>'.$userDisplay.'</td></tr>';
- 	
-	print '</table>';
-	print '</td></tr>';
 
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';

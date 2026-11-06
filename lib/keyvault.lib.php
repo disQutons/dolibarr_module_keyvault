@@ -28,11 +28,11 @@
  */
 function keyvaultAdminPrepareHead()
 {
-	global $langs, $conf;
+	global $langs, $conf, $db;
 
-	// global $db;
-	// $extrafields = new ExtraFields($db);
-	// $extrafields->fetch_name_optionals_label('myobject');
+	require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+	$extrafields = new ExtraFields($db);
+	$extrafields->fetch_name_optionals_label('keyvault_key');
 
 	$langs->load("keyvault@keyvault");
 
@@ -44,25 +44,14 @@ function keyvaultAdminPrepareHead()
 	$head[$h][2] = 'settings';
 	$h++;
 
-	/*
-	$head[$h][0] = dol_buildpath("/keyvault/admin/myobject_extrafields.php", 1);
+	$head[$h][0] = dol_buildpath("/keyvault/admin/key_extrafields.php", 1);
 	$head[$h][1] = $langs->trans("ExtraFields");
-	$nbExtrafields = (isset($extrafields->attributes['myobject']['label']) && is_countable($extrafields->attributes['myobject']['label'])) ? count($extrafields->attributes['myobject']['label']) : 0;
+	$nbExtrafields = (isset($extrafields->attributes['keyvault_key']['label']) && is_countable($extrafields->attributes['keyvault_key']['label'])) ? count($extrafields->attributes['keyvault_key']['label']) : 0;
 	if ($nbExtrafields > 0) {
-		$head[$h][1] .= '<span class="badge marginleftonlyshort">' . $nbExtrafields . '</span>';
+		$head[$h][1] .= '<span class="badge marginleftonlyshort">'.$nbExtrafields.'</span>';
 	}
-	$head[$h][2] = 'myobject_extrafields';
+	$head[$h][2] = 'key_extrafields';
 	$h++;
-
-	$head[$h][0] = dol_buildpath("/keyvault/admin/myobjectline_extrafields.php", 1);
-	$head[$h][1] = $langs->trans("ExtraFieldsLines");
-	$nbExtrafields = (isset($extrafields->attributes['myobjectline']['label']) && is_countable($extrafields->attributes['myobjectline']['label'])) ? count($extrafields->attributes['myobject']['label']) : 0;
-	if ($nbExtrafields > 0) {
-		$head[$h][1] .= '<span class="badge marginleftonlyshort">' . $nbExtrafields . '</span>';
-	}
-	$head[$h][2] = 'myobject_extrafieldsline';
-	$h++;
-	*/
 
 	$head[$h][0] = dol_buildpath("/keyvault/admin/about.php", 1);
 	$head[$h][1] = $langs->trans("About");
